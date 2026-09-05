@@ -44,7 +44,7 @@ pipeline {
         stage('OWASP Dependency-Check Scan') {
             steps {
                 dir('Tetris-V1') {
-                    dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
+                    dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'OWASP-Dependency-Check'
                     dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
                 }
             }
