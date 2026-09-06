@@ -3,8 +3,8 @@ pipeline {
     tools {
         nodejs 'nodejs'
     }
-    environment  {
-        SCANNER_HOME=tool 'sonar-scanner'
+    environment {
+        SCANNER_HOME = tool 'sonar-scanner'
     }
     stages {
         stage('Cleaning Workspace') {
@@ -80,7 +80,7 @@ pipeline {
         }
         stage("TRIVY Image Scan") {
             steps {
-                sh 'trivy image avian19/tetrisv1:${BUILD_NUMBER} > trivyimage.txt'
+                sh 'trivy image cloudops2026/tetrisv1:${BUILD_NUMBER} > trivyimage.txt'
             }
         }
         stage('Checkout Code') {
@@ -106,7 +106,7 @@ pipeline {
                             sed -i "s/tetrisv1:${imageTag}/tetrisv1:${BUILD_NUMBER}/" deployment-service.yml
                             git add deployment-service.yml
                             git commit -m "Update deployment Image to version \${BUILD_NUMBER}"
-                            git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:master
+                            git push https://${GITHUB_TOKEN}@GitHub.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:master
                         '''
                     }
                 }
