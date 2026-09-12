@@ -1,4 +1,3 @@
-```groovy
 pipeline {
 
     agent any
@@ -29,7 +28,7 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 dir('Tetris-V2') {
-                    withSonarQubeEnv('SonarQube token') {
+                    withSonarQubeEnv('SonarQube') {
                         sh '''
                             $SCANNER_HOME/bin/sonar-scanner \
                             -Dsonar.projectName=Tetris-V2 \
@@ -45,7 +44,7 @@ pipeline {
                 script {
                     waitForQualityGate(
                         abortPipeline: false,
-                        credentialsId: 'sonar-token'
+                        credentialsId: 'SonarQube token'
                     )
                 }
             }
@@ -62,6 +61,7 @@ pipeline {
         stage('OWASP Dependency-Check Scan') {
             steps {
                 dir('Tetris-V2') {
+
                     dependencyCheck(
                         additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit',
                         odcInstallation: 'DP-Check'
@@ -86,12 +86,17 @@ pipeline {
             steps {
                 script {
                     dir('Tetris-V2') {
+
                         withDockerRegistry(
                             credentialsId: 'docker',
                             toolName: 'docker'
                         ) {
+
                             sh 'docker system prune -f'
-                            sh 'docker build -t tetris-v2 .'
+
+                            sh '''
+                                docker build -t tetris-v2 .
+                            '''
                         }
                     }
                 }
@@ -101,12 +106,15 @@ pipeline {
         stage('Docker Image Pushing') {
             steps {
                 script {
+
                     withDockerRegistry(
                         credentialsId: 'docker',
                         toolName: 'docker'
                     ) {
+
                         sh '''
                             docker tag tetris-v2 cloudops2026/tetris-v2:${BUILD_NUMBER}
+
                             docker push cloudops2026/tetris-v2:${BUILD_NUMBER}
                         '''
                     }
@@ -123,24 +131,28 @@ pipeline {
         }
 
         stage('Update Deployment File') {
+
             environment {
                 GIT_REPO_NAME = 'End-to-End-Kubernetes-DevSecOps-Tetris-Project'
                 GIT_USER_NAME = 'sachaws'
             }
 
             steps {
+
                 dir('Manifest-file') {
+
                     withCredentials([
                         string(
                             credentialsId: 'github',
                             variable: 'GITHUB_TOKEN'
                         )
                     ]) {
+
                         sh '''
                             git config user.email "sachaws@users.noreply.github.com"
                             git config user.name "sachaws"
 
-                            echo "Updating image to:"
+                            echo "Updating deployment image to:"
                             echo "cloudops2026/tetris-v2:${BUILD_NUMBER}"
 
                             sed -i "s|image:.*|image: cloudops2026/tetris-v2:${BUILD_NUMBER}|" deployment-service.yml
@@ -157,4 +169,3 @@ pipeline {
         }
     }
 }
-```
