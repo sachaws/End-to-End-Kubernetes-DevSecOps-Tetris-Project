@@ -29,7 +29,7 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 dir('Tetris-V2') {
-                    withSonarQubeEnv('SonarQube') {
+                    withSonarQubeEnv('SonarQube token') {
                         sh '''
                             $SCANNER_HOME/bin/sonar-scanner \
                             -Dsonar.projectName=Tetris-V2 \
